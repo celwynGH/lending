@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Titus Cash Lending</title>
+  <link rel="icon" type="image/png" href="images/mypic.png">
+  <link rel="stylesheet" href="lending.css">
+  <script src="lending.js" defer></script>
+
+  
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Titus Cash Lending</h1>
+        <div class="subtitle">Manage and track all your money lending</div>
+      </div>
+      <!--<button class="btn-primary" onclick="addLoan()">+ Add New Loan</button>-->
+      <button onclick="openModal()">+ Add New Loan</button>
+    </header>
+
+    <section class="stats">
+      <div class="stat"><div><h3>TOTAL LENT</h3><p id="totalLent">₱0</p></div><div class="icon" style="background:#475569">₱</div></div>
+      <div class="stat"><div><h3>TO COLLECT</h3><p id="toCollect">₱0</p></div><div class="icon" style="background:#2563eb">↑</div></div>
+      <div class="stat"><div><h3>OVERDUE</h3><p id="overdue">₱0</p></div><div class="icon" style="background:#dc2626">!</div></div>
+      <div class="stat"><div><h3>PAID OFF</h3><p id="paidCount">0</p></div><div class="icon" style="background:#16a34a">✓</div></div>
+    </section>
+
+    <div class="search">
+      <input id="search" placeholder="Search by borrower name..." oninput="render()" />
+    </div>
+
+    <div id="loanList"></div>
+  </div>
+
+  <!-- ADD LOAN MODAL -->
+<div id="loanModal" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Add New Loan</h2>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <label>Borrower Name</label>
+      <input id="m_name" type="text" placeholder="Enter borrower's name">
+
+      <div class="row">
+        <div>
+          <label>Loan Date</label>
+          <input id="m_loanDate" type="date">
+        </div>
+        <div>
+          <label>Term</label>
+          <div class="term-group">
+            <input id="m_termValue" type="number" placeholder="e.g. 2">
+            <select id="m_termUnit">
+              <option value="week">Weeks</option>
+              <option value="month" selected>Months</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Loan Amount (₱)</label>
+          <input id="m_principal" type="number">
+        </div>
+        <div>
+          <label>Interest Rate (%)</label>
+          <input id="m_interest" type="number">
+        </div>
+      </div>
+
+      <label>Return Date</label>
+      <input id="m_returnDate" type="date" readonly>
+
+      <label>Notes (Optional)</label>
+      <textarea id="m_notes" rows="3"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-light" onclick="closeModal()">Cancel</button>
+      <button class="btn-dark" onclick="submitLoan()">Add Loan</button>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>
