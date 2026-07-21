@@ -1,6 +1,7 @@
 /*********************************
  * DATA STORAGE
  *********************************/
+let editIndex = -1;
 let loans = JSON.parse(localStorage.getItem("loans")) || [];
 
 function saveLoans() {
@@ -40,7 +41,11 @@ function render() {
     .filter(l => l.name.toLowerCase().includes(q))
     .forEach((l, i) => {
 
-      const due = l.principal + (l.principal * l.interest / 100);
+      const loanWithInterest =
+    l.principal + (l.principal * l.interest / 100);
+
+      const due =
+    loanWithInterest - (l.initialPayment || 0);
       total += l.principal;
       if (l.paid) {
   paid++;
@@ -71,6 +76,14 @@ function render() {
               <span class="badge ${badgeClass}">${badgeText}</span>
             </div>
             <div class="actions">
+
+<button onclick="editLoan(${i})">
+Edit
+</button>
+
+
+
+</div>
               ${!l.paid ? `<button class="btn-success" onclick="markPaid(${i})">Paid</button>` : ''}
               <button class="btn-danger" onclick="removeLoan(${i})">Delete</button>
             </div>
@@ -78,6 +91,7 @@ function render() {
 
           <div class="loan-body">
             <div><div class="label">PRINCIPAL</div><div class="value">${peso(l.principal)}</div></div>
+            <div><div class="label">INITIAL PAYMENT</div><div class="value">${peso(l.initialPayment||0)}</div></div>
             <div><div class="label">INTEREST</div><div class="value">${l.interest}%</div></div>
             <div><div class="label">TOTAL DUE</div><div class="value" style="color:var(--success)">${peso(due)}</div></div>
             <div><div class="label">TERM</div><div class="value">${l.term}</div></div>
@@ -118,14 +132,35 @@ function removeLoan(i) {
 /*********************************
  * MODAL CONTROLS
  *********************************/
-function openModal() {
-  document.getElementById('loanModal').classList.remove('hidden');
-  document.getElementById('m_loanDate').value =
-    new Date().toISOString().slice(0, 10);
+function openModal(isEdit = false) {
+
+    if (!isEdit) {
+        editIndex = -1;
+
+        document.querySelector(".btn-dark").textContent = "Add Loan";
+
+        m_name.value = "";
+        m_principal.value = "";
+        m_initialPayment.value = 0;
+        m_interest.value = "";
+        m_termValue.value = "";
+        m_termUnit.value = "month";
+        m_returnDate.value = "";
+
+        m_loanDate.value = new Date().toISOString().slice(0,10);
+    }
+
+    document.getElementById("loanModal").classList.remove("hidden");
 }
 
 function closeModal() {
-  document.getElementById('loanModal').classList.add('hidden');
+    document.getElementById("loanModal").classList.add("hidden");
+
+    // Reset edit mode
+    editIndex = -1;
+
+    // Restore button text
+    document.querySelector(".btn-dark").textContent = "Add Loan";
 }
 
 
@@ -157,27 +192,70 @@ m_loanDate.addEventListener('change', updateReturn);
 /*********************************
  * SUBMIT LOAN
  *********************************/
-function submitLoan() {
-  const loan = {
-    name: m_name.value.trim(),
-    principal: Number(m_principal.value),
-    interest: Number(m_interest.value),
-    term: `${m_termValue.value} ${m_termUnit.value}`,
-    date: m_loanDate.value,
-    returnDate: m_returnDate.value,
-    paid: false
-  };
+function submitLoan(){
 
-  if (!loan.name || loan.principal <= 0) {
-    alert('Please complete required fields');
-    return;
-  }
+    const loan = {
 
-  loans.push(loan);
-  saveLoans();
-  closeModal();
-  render();
+        id: editIndex == -1 ? Date.now() : loans[editIndex].id,
+
+        name: m_name.value.trim(),
+
+        principal: Number(m_principal.value),
+
+        initialPayment: Number(m_initialPayment.value) || 0,
+
+        interest: Number(m_interest.value),
+
+        term: `${m_termValue.value} ${m_termUnit.value}`,
+
+        date: m_loanDate.value,
+
+        returnDate: m_returnDate.value,
+
+        paid: editIndex == -1 ? false : loans[editIndex].paid
+    };
+
+    if(editIndex === -1){
+        loans.push(loan);
+    }else{
+        loans[editIndex] = loan;
+    }
+
+    saveLoans();
+    closeModal();
+    render();
 }
+
+/*********************************
+ * EDIT LOAN
+ *********************************/
+function editLoan(i){
+
+    editIndex = i;
+
+    const l = loans[i];
+
+    openModal(true);
+
+    m_name.value = l.name;
+    m_principal.value = l.principal;
+    m_initialPayment.value = l.initialPayment || 0;
+    m_interest.value = l.interest;
+
+    m_loanDate.value = l.date;
+
+    const term = l.term.split(" ");
+
+    m_termValue.value = term[0];
+    m_termUnit.value = term[1];
+
+    m_returnDate.value = l.returnDate;
+
+    document.querySelector(".btn-dark").textContent = "Save Changes";
+}
+
+
+
 
 
 /*********************************
